@@ -13,4 +13,6 @@ Route::post('/players', [UserController::class, 'store']);
 Route::post('/players/login', [UserController::class, 'login']);
 Route::put('/players/{id}', [UserController::class, 'updateName'])->middleware('auth:api');
 Route::post('/players/{id}/games', [GameController::class, 'rollDice'])->middleware('auth:api');
+Route::delete('/players/{id}/games', [GameController::class, 'deleteGames'])->middleware('auth:api');
+
 
