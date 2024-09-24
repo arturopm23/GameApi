@@ -15,7 +15,7 @@ class UserController extends Controller
     // Validar la solicitud
     $request->validate([
         'email' => 'required|email|unique:users',
-        'name' => 'nullable|string|unique:users,name',
+        'name' => 'nullable|string|unique:users,name|max:255',
         'password' => 'required|string|min:6',
     ]);
 
@@ -40,7 +40,7 @@ public function updateName(Request $request, $id)
     {
         // Validar la solicitud
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|unique:users,name|max:255',
         ]);
 
         // Buscar al usuario
