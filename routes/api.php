@@ -15,4 +15,10 @@ Route::put('/players/{id}', [UserController::class, 'updateName'])->middleware('
 Route::post('/players/{id}/games', [GameController::class, 'rollDice'])->middleware('auth:api');
 Route::delete('/players/{id}/games', [GameController::class, 'deleteGames'])->middleware('auth:api');
 
-
+// Grouping the players route with 'auth:api' and 'role:admin'
+Route::group(['middleware' => ['auth:api', 'role:admin']], function () {
+    Route::get('/players', [UserController::class, 'index']);
+    Route::get('/players/ranking', [UserController::class, 'ranking']);
+    Route::get('/players/ranking/loser', [UserController::class, 'loser']);
+    Route::get('/players/ranking/winner', [UserController::class, 'winner']);
+});

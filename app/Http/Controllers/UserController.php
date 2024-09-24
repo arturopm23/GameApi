@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
+
 class UserController extends Controller
 {
 
@@ -59,9 +60,6 @@ public function updateName(Request $request, $id)
     return response()->json(['message' => 'Name updated successfully.', 'name' => $user->name], 200);
 }
 
-
-
-
     public function login(Request $request)
 {
     $request->validate([
@@ -79,6 +77,99 @@ public function updateName(Request $request, $id)
     }
 
     return response()->json(['error' => 'Unauthorized'], 401);
+}
+
+public function index()
+{
+    // Get all players
+    $players = User::with('games')->get()->map(function ($player) {
+        // Calculate average success percentage using the model method
+        $averageSuccessPercentage = $player->calculateSuccessRate();
+
+        return [
+            'id' => $player->id,
+            'name' => $player->name,
+            'email' => $player->email,
+            'average_success_percentage' => $averageSuccessPercentage,
+        ];
+        // Sort players by success rate in descending order
+    $rankedPlayers = $playersWithSuccessRates->sortByDesc('success_rate');
+    });
+
+    return response()->json($players, 200);
+}
+
+public function ranking()
+{
+    // Get all players with their games
+    $players = User::with('games')->get();
+
+    // Calculate the total success percentage and the count of players
+    $totalSuccessPercentage = 0;
+    $totalPlayers = $players->count();
+
+    foreach ($players as $player) {
+        $totalSuccessPercentage += $player->calculateSuccessRate(); // Call the method you created in the User model
+    }
+
+    // Calculate average success percentage across all players
+    $averageSuccessPercentage = $totalPlayers > 0 ? $totalSuccessPercentage / $totalPlayers : 0;
+
+    return response()->json([
+        'average_success_percentage' => $averageSuccessPercentage,
+    ], 200);
+}
+
+public function loser()
+{
+    // Get all players with their games
+    $players = User::with('games')->get();
+
+    // Calculate each player's success rate
+    $playersWithSuccessRates = $players->map(function ($player) {
+        // Calculate average success percentage
+        $totalGames = $player->games->count();
+        $totalWins = $player->games->where('win', true)->count();
+        $averageSuccessPercentage = $totalGames > 0 ? ($totalWins / $totalGames) * 100 : 0;
+
+        return [
+            'id' => $player->id,
+            'name' => $player->name,
+            'email' => $player->email,
+            'success_rate' => $averageSuccessPercentage,
+        ];
+    });
+
+    // Find the player with the lowest success rate
+    $loser = $playersWithSuccessRates->sortBy('success_rate')->first();
+
+    return response()->json($loser, 200);
+}
+
+public function winner()
+{
+    // Get all players with their games
+    $players = User::with('games')->get();
+
+    // Calculate each player's success rate
+    $playersWithSuccessRates = $players->map(function ($player) {
+        // Calculate average success percentage
+        $totalGames = $player->games->count();
+        $totalWins = $player->games->where('win', true)->count();
+        $averageSuccessPercentage = $totalGames > 0 ? ($totalWins / $totalGames) * 100 : 0;
+
+        return [
+            'id' => $player->id,
+            'name' => $player->name,
+            'email' => $player->email,
+            'success_rate' => $averageSuccessPercentage,
+        ];
+    });
+
+    // Find the player with the highest success rate
+    $winner = $playersWithSuccessRates->sortByDesc('success_rate')->first();
+
+    return response()->json($winner, 200);
 }
 
 }
