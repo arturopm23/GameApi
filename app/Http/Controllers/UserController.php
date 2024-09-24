@@ -172,4 +172,19 @@ public function winner()
     return response()->json($winner, 200);
 }
 
+public function getGamesByPlayer($id)
+{
+    //Make sure is the user
+    if (auth()->id() != $id) {
+        return response()->json(['message' => 'You do not have permission to watch this user\'s play history.'], 403);    }
+    // Find the player by ID
+    $player = User::with('games')->findOrFail($id);
+
+    // Retrieve the games of the player
+    $games = $player->games;
+
+    return response()->json($games, 200);
+}
+
+
 }
