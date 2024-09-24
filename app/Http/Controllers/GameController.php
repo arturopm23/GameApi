@@ -27,4 +27,17 @@ class GameController extends Controller
 
         return response()->json(['message' => 'Dice rolled successfully.', 'game' => $game], 201);
     }
+
+    public function deleteGames($id)
+    {
+        // Verify the authenticated user is the same as the player ID
+        if (auth()->id() != $id) {
+            return response()->json(['message' => 'You do not have permission to delete games for this player.'], 403);
+        }
+
+        // Delete all games associated with the player
+        Game::where('user_id', $id)->delete();
+
+        return response()->json(['message' => 'All games deleted successfully.'], 200);
+    }
 }
