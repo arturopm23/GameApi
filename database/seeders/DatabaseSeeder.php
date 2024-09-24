@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Game;
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,11 +14,34 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Create roles
+        Role::create(['name' => 'player']);
+        Role::create(['name' => 'admin']);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // Create one admin user
+        $admin = User::factory()->create([
+            'name' => 'Admin User',
+            'email' => 'admin@example.com',
+            'password' => bcrypt('password'),
         ]);
+        $admin->assignRole('admin'); // Assign the admin role
+
+        // Create multiple regular users
+        User::factory()->count(5)->create()->each(function ($user) {
+            $user->assignRole('player'); // Assign the player role
+        });
+
+        // Get all users to create games
+        $users = User::all();
+
+        // Create multiple games for each user
+        foreach ($users as $user) {
+            Game::factory()->count(3)->create([
+                'user_id' => $user->id,
+                'dice1' => rand(1, 6),
+                'dice2' => rand(1, 6),
+                'win' => (rand(0, 1) == 1),
+            ]);
+        }
     }
 }
