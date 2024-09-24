@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
+
     public function store(Request $request)
 {
     // Validar la solicitud
@@ -34,5 +36,40 @@ class UserController extends Controller
     ], 201);
 }
 
+public function updateName(Request $request, $id)
+    {
+        // Validar la solicitud
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        // Buscar al usuario
+        $user = User::findOrFail($id);
+
+        // Actualizar el nombre del usuario
+        $user->name = $request->input('name');
+        $user->save();
+
+        return response()->json(['message' => 'Nombre actualizado correctamente.', 'user' => $user], 200);
+    }
+
+    public function login(Request $request)
+{
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
+
+    $credentials = $request->only('email', 'password');
+
+    if (Auth::attempt($credentials)) {
+        $user = Auth::user();
+        $token = $user->createToken('YourAppName')->accessToken;
+
+        return response()->json(['token' => $token]);
+    }
+
+    return response()->json(['error' => 'Unauthorized'], 401);
+}
 
 }

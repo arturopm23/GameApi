@@ -9,3 +9,5 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:api');
 
 Route::post('/players', [UserController::class, 'store']);
+Route::post('/players/login', [UserController::class, 'login']);
+Route::put('/players/{id}', [UserController::class, 'updateName'])->middleware('auth:api');
