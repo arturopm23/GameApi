@@ -37,21 +37,30 @@ class UserController extends Controller
 }
 
 public function updateName(Request $request, $id)
-    {
-        // Validar la solicitud
-        $request->validate([
-            'name' => 'required|string|unique:users,name|max:255',
-        ]);
-
-        // Buscar al usuario
-        $user = User::findOrFail($id);
-
-        // Actualizar el nombre del usuario
-        $user->name = $request->input('name');
-        $user->save();
-
-        return response()->json(['message' => 'Nombre actualizado correctamente.', 'user' => $user], 200);
+{
+    // Check if the authenticated user is the same as the user being updated
+    if (auth()->id() != $id) {
+        return response()->json(['message' => 'You do not have permission to update this user.'], 403);
     }
+
+    // Validate the request
+    $request->validate([
+        'name' => 'required|string|unique:users,name,' . $id . '|max:255',
+    ]);
+
+    // Find the user
+    $user = User::findOrFail($id);
+
+    // Update the user's name
+    $user->update([
+        'name' => $request->input('name'),
+    ]);
+
+    return response()->json(['message' => 'Name updated successfully.', 'name' => $user->name], 200);
+}
+
+
+
 
     public function login(Request $request)
 {
