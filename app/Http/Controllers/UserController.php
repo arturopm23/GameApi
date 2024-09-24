@@ -4,16 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
+
     public function store(Request $request)
 {
     // Validar la solicitud
     $request->validate([
         'email' => 'required|email|unique:users',
-        'name' => 'nullable|string|unique:users,name',
+        'name' => 'nullable|string|unique:users,name|max:255',
         'password' => 'required|string|min:6',
     ]);
 
@@ -34,5 +36,49 @@ class UserController extends Controller
     ], 201);
 }
 
+public function updateName(Request $request, $id)
+{
+    // Check if the authenticated user is the same as the user being updated
+    if (auth()->id() != $id) {
+        return response()->json(['message' => 'You do not have permission to update this user.'], 403);
+    }
+
+    // Validate the request
+    $request->validate([
+        'name' => 'required|string|unique:users,name,' . $id . '|max:255',
+    ]);
+
+    // Find the user
+    $user = User::findOrFail($id);
+
+    // Update the user's name
+    $user->update([
+        'name' => $request->input('name'),
+    ]);
+
+    return response()->json(['message' => 'Name updated successfully.', 'name' => $user->name], 200);
+}
+
+
+
+
+    public function login(Request $request)
+{
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
+
+    $credentials = $request->only('email', 'password');
+
+    if (Auth::attempt($credentials)) {
+        $user = Auth::user();
+        $token = $user->createToken('YourAppName')->accessToken;
+
+        return response()->json(['token' => $token]);
+    }
+
+    return response()->json(['error' => 'Unauthorized'], 401);
+}
 
 }
