@@ -14,6 +14,8 @@ Route::post('/players/login', [UserController::class, 'login']);
 Route::put('/players/{id}', [UserController::class, 'updateName'])->middleware('auth:api');
 Route::post('/players/{id}/games', [GameController::class, 'rollDice'])->middleware('auth:api');
 Route::delete('/players/{id}/games', [GameController::class, 'deleteGames'])->middleware('auth:api');
+Route::get('/players/{id}/games', [UserController::class, 'getGamesByPlayer'])->middleware('auth:api');
+
 
 // Grouping the players route with 'auth:api' and 'role:admin'
 Route::group(['middleware' => ['auth:api', 'role:admin']], function () {
