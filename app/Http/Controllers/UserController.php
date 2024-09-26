@@ -71,7 +71,7 @@ public function updateName(Request $request, $id)
 
     if (Auth::attempt($credentials)) {
         $user = Auth::user();
-        $token = $user->createToken('YourAppName')->accessToken;
+        $token = $user->createToken(env('APP_NAME'))->accessToken;
 
         return response()->json(['token' => $token]);
     }
